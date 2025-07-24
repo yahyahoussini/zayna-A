@@ -1,0 +1,43 @@
+User-agent: *
+Allow: /
+
+# Priority pages for SEO
+Allow: /products
+Allow: /product/*
+Allow: /about
+Allow: /contact
+
+# Block admin areas
+Disallow: /admin/
+Disallow: /admin/*
+
+# Block cart and checkout (no SEO value)
+Disallow: /cart
+Disallow: /checkout
+
+# Sitemap location
+Sitemap: https://biobeautymaroc.com/sitemap.xml
+
+# Crawl delay (be nice to servers)
+Crawl-delay: 1
+
+# Specific instructions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Block specific pages that shouldn't be indexed
+Disallow: /order-confirmation
+Disallow: /track-order
+Disallow: /privacy
+Disallow: /terms
