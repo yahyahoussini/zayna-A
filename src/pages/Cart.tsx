@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Lock, Loader2, Truck } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Lock, Loader2, Truck, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Product } from '@/types'; // Assurez-vous d'avoir un type Product défini
 
 // --- Schéma de validation du formulaire ---
 const shippingSchema = z.object({
@@ -30,6 +31,121 @@ const shippingSchema = z.object({
 });
 
 type ShippingFormData = z.infer<typeof shippingSchema>;
+
+// --- Composant pour le panier vide ---
+const EmptyCart = () => {
+  const { addToCart } = useCart();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        setLoading(true);
+        // Fetch the 3 most recent products. You can customize this query.
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (error) throw error;
+        
+        // Assurez-vous que les images sont des URL valides
+        const productsWithImages = data.map(p => ({ ...p, image: p.images[0] || 'https://via.placeholder.com/300x300.png/F2EFEB/3D2C21?text=Zayna' }));
+        setFeaturedProducts(productsWithImages);
+
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        setError("Nous n'avons pas pu charger les produits en vedette. Veuillez réessayer plus tard.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image, // Utilisez l'image principale
+      quantity: 1,
+    });
+    toast({ title: `${product.name} a été ajouté au panier!` });
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <motion.div 
+        className="text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <ShoppingBag className="h-24 w-24 text-primary/50 mx-auto mb-6" />
+        <h1 className="text-3xl font-bold mb-4">Votre panier est vide pour le moment</h1>
+        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          On dirait que vous n'avez encore rien ajouté. Parcourez nos collections pour trouver quelque chose qui vous plaira !
+        </p>
+        <Button asChild size="lg">
+          <Link to="/products">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Continuer les achats
+          </Link>
+        </Button>
+      </motion.div>
+
+      <Separator className="my-12 bg-gray-200" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">Découvrez nos Nouveautés</h2>
+        
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+
+        {error && (
+            <div className="text-center py-8 text-red-600 bg-red-50 p-4 rounded-lg flex items-center justify-center">
+                <AlertCircle className="h-5 w-5 mr-2" />
+                {error}
+            </div>
+        )}
+
+        {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredProducts.map(product => (
+              <Card key={product.id} className="overflow-hidden group">
+                <CardContent className="p-0">
+                  <Link to={`/product/${product.id}`}>
+                    <img src={product.image} alt={product.name} className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105" />
+                  </Link>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg truncate" title={product.name}>{product.name}</h3>
+                    <p className="text-primary font-bold mt-1">{product.price.toFixed(2)} DH</p>
+                    <Button className="w-full mt-4" onClick={() => handleAddToCart(product)}>
+                      Ajouter au panier
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -116,13 +232,9 @@ const Cart = () => {
   if (state.items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <Helmet><title>Panier Vide | Zayna</title></Helmet>
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <ShoppingBag className="h-24 w-24 text-gray-300 mx-auto mb-6" />
-          <h1 className="text-3xl font-bold mb-4">Votre panier est vide</h1>
-          <p className="text-gray-600 mb-8">Il semble que vous n'ayez encore ajouté aucun article.</p>
-          <Link to="/products"><Button size="lg">Continuer vos achats</Button></Link>
-        </div>
+        <EmptyCart />
         <Footer />
       </div>
     );
