@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Order, Category, ProductForm } from '@/types/admin';
 import { toast } from '@/hooks/use-toast';
@@ -9,7 +9,9 @@ export const useAdminData = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  // --- MODIFIED: loadData now fetches everything in parallel ---
+  const loadData = useCallback(async () => {
+    setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -18,37 +20,35 @@ export const useAdminData = () => {
         return;
       }
 
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // --- All requests are sent at the same time ---
+      const [productsResponse, ordersResponse, categoriesResponse] = await Promise.all([
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('orders').select('*, order_items ( * )').order('created_at', { ascending: false }),
+        supabase.from('categories').select('*').order('name')
+      ]);
+      
+      // --- Handle all potential errors after requests complete ---
+      if (productsResponse.error) throw productsResponse.error;
+      if (ordersResponse.error) throw ordersResponse.error;
+      if (categoriesResponse.error) throw categoriesResponse.error;
 
-      if (productsError) throw productsError;
-      setProducts(productsData || []);
-
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select('*, order_items ( * )')
-        .order('created_at', { ascending: false });
-
-      if (ordersError) throw ordersError;
-      setOrders(ordersData || []);
-
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-
-      if (categoriesError) throw categoriesError;
-      setCategories(categoriesData || []);
+      // --- Set all state at once ---
+      setProducts(productsResponse.data || []);
+      setOrders(ordersResponse.data || []);
+      setCategories(categoriesResponse.data || []);
 
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading admin data:', error);
       toast({ title: 'Error', description: 'Failed to load data from the server.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Use useCallback to memoize this function
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -92,10 +92,8 @@ export const useAdminData = () => {
           price: price,
           category: productForm.category,
           description: productForm.description,
-          // --- DEBUT DE LA MODIFICATION ---
-          thumbnail_image: productForm.images?.[0] || null, // Utilise le nouveau nom de colonne
+          thumbnail_image: productForm.images?.[0] || null,
           images: productForm.images,
-          // --- FIN DE LA MODIFICATION ---
           in_stock: true,
           discount_percentage: discount,
           badge_text: productForm.badge_text,
@@ -138,15 +136,13 @@ export const useAdminData = () => {
           price: editProductForm.price,
           category: editProductForm.category,
           description: editProductForm.description,
-          image: editProductForm.image,
           in_stock: editProductForm.in_stock,
           rating: editProductForm.rating,
-          num_reviews: editProductForm.num_reviews,
           discount_percentage: editProductForm.discount_percentage,
           badge_text: editProductForm.badge_text,
           badge_color: editProductForm.badge_color,
            images: editProductForm.images,
-  thumbnail_image: editProductForm.images?.[0] || null,
+          thumbnail_image: editProductForm.images?.[0] || null,
         })
         .eq('id', editProductForm.id);
 
@@ -194,10 +190,6 @@ export const useAdminData = () => {
       toast({ title: 'Error', description: 'Failed to delete category.', variant: 'destructive' });
     }
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   return {
     products,
