@@ -110,9 +110,8 @@ const useProductFilters = () => {
             try {
                 let query = supabase.from('products').select('*', { count: 'exact' });
 
-                // Apply filters directly to the Supabase query
                 if (debouncedFilters.searchQuery) {
-                    query = query.ilike('name', `%${debouncedFilters.searchQuery}%`);
+                    query = query.like('name', `%${debouncedFilters.searchQuery}%`);
                 }
                 if (debouncedFilters.filterCategory !== 'all') {
                     query = query.eq('category', debouncedFilters.filterCategory);
@@ -122,7 +121,6 @@ const useProductFilters = () => {
                 
                 const maxPrice = parseFloat(debouncedFilters.priceRange.max);
                 if (!isNaN(maxPrice)) query = query.lte('price', maxPrice);
-
                 // Apply sorting
                 const [sortField, sortOrder] = debouncedFilters.sortBy.split('-');
                 if (sortField) {
@@ -160,8 +158,7 @@ const useProductFilters = () => {
         try {
             let query = supabase.from('products').select('*');
 
-            // Re-apply filters for the next page
-            if (debouncedFilters.searchQuery) query = query.ilike('name', `%${debouncedFilters.searchQuery}%`);
+            if (debouncedFilters.searchQuery) query = query.like('name', `%${debouncedFilters.searchQuery}%`);
             if (debouncedFilters.filterCategory !== 'all') query = query.eq('category', debouncedFilters.filterCategory);
             const minPrice = parseFloat(debouncedFilters.priceRange.min);
             if (!isNaN(minPrice)) query = query.gte('price', minPrice);
