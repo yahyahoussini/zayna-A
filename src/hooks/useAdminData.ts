@@ -16,38 +16,30 @@ export const useAdminData = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
 
-  const loadData = useCallback(async (page: number, type: 'products' | 'orders' | 'all' = 'all') => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const from = (page - 1) * ITEMS_PER_PAGE;
-      const to = from + ITEMS_PER_PAGE - 1;
+      const productsFrom = (productsPage - 1) * ITEMS_PER_PAGE;
+      const productsTo = productsFrom + ITEMS_PER_PAGE - 1;
 
-      const productsQuery = supabase.from('products').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to);
-      const ordersQuery = supabase.from('orders').select('*, order_items ( * )', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to);
-      const categoriesQuery = supabase.from('categories').select('*').order('name');
-      
-      const promises = [];
-      if (type === 'all' || type === 'products') promises.push(productsQuery);
-      if (type === 'all' || type === 'orders') promises.push(ordersQuery);
-      if (type === 'all') promises.push(categoriesQuery);
+      const ordersFrom = (ordersPage - 1) * ITEMS_PER_PAGE;
+      const ordersTo = ordersFrom + ITEMS_PER_PAGE - 1;
 
-      const [productsResponse, ordersResponse, categoriesResponse] = await Promise.all(promises);
+      const [productsResponse, ordersResponse, categoriesResponse] = await Promise.all([
+        supabase.from('products').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(productsFrom, productsTo),
+        supabase.from('orders').select('*, order_items ( * )', { count: 'exact' }).order('created_at', { ascending: false }).range(ordersFrom, ordersTo),
+        supabase.from('categories').select('*').order('name')
+      ]);
 
-      if (productsResponse?.error) throw productsResponse.error;
-      if (ordersResponse?.error) throw ordersResponse.error;
-      if (categoriesResponse?.error) throw categoriesResponse.error;
+      if (productsResponse.error) throw productsResponse.error;
+      if (ordersResponse.error) throw ordersResponse.error;
+      if (categoriesResponse.error) throw categoriesResponse.error;
 
-      if (productsResponse?.data) {
-        setProducts(productsResponse.data);
-        setTotalProducts(productsResponse.count || 0);
-      }
-      if (ordersResponse?.data) {
-        setOrders(ordersResponse.data);
-        setTotalOrders(ordersResponse.count || 0);
-      }
-      if (categoriesResponse?.data) {
-        setCategories(categoriesResponse.data);
-      }
+      setProducts(productsResponse.data || []);
+      setTotalProducts(productsResponse.count || 0);
+      setOrders(ordersResponse.data || []);
+      setTotalOrders(ordersResponse.count || 0);
+      setCategories(categoriesResponse.data || []);
 
     } catch (e) {
       const error = e as Error;
@@ -56,19 +48,11 @@ export const useAdminData = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [productsPage, ordersPage]);
 
   useEffect(() => {
-    loadData(1, 'all');
+    loadData();
   }, [loadData]);
-
-  useEffect(() => {
-    loadData(productsPage, 'products');
-  }, [productsPage, loadData]);
-
-  useEffect(() => {
-    loadData(ordersPage, 'orders');
-  }, [ordersPage, loadData]);
 
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
