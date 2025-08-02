@@ -89,23 +89,31 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
-
-  // Load cart from localStorage on mount
-  useEffect(() => {
+// --- PERFORMANCE OPTIMIZATION ---
+// Initialize state directly from localStorage to prevent "flicker" on page load.
+// This function is run once when the module is first loaded.
+const getInitialState = (): CartState => {
+  try {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      try {
-        const cartItems = JSON.parse(savedCart);
-        dispatch({ type: 'LOAD_CART', payload: cartItems });
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
-      }
+      const items = JSON.parse(savedCart) as CartItem[];
+      const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      return { items, total };
     }
-  }, []);
+  } catch (error) {
+    console.error('Error loading cart from localStorage on init:', error);
+  }
+  // Return a default empty state if nothing is saved or an error occurs.
+  return { items: [], total: 0 };
+};
 
-  // Save cart to localStorage whenever it changes
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // The useReducer hook is now initialized with the state from localStorage.
+  const [state, dispatch] = useReducer(cartReducer, getInitialState());
+
+  // The useEffect for loading the cart is no longer needed.
+
+  // Save cart to localStorage whenever it changes. This part remains the same.
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(state.items));
   }, [state.items]);
