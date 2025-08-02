@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Leaf } from 'lucide-react';
+import { ShoppingCart, Menu, X, Leaf, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Header = () => {
   const { getTotalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { lang, setLang, supportedLanguages } = useLanguage();
 
   const navigation = [
-    { name: 'Accueil', href: '/' },
-    { name: 'Produits', href: '/products' },
-    { name: 'À Propos', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Suivre ma Commande', href: '/track-order' },
+    { name: 'Accueil', href: '' },
+    { name: 'Produits', href: 'products' },
+    { name: 'À Propos', href: 'about' },
+    { name: 'Contact', href: 'contact' },
+    { name: 'Suivre ma Commande', href: 'track-order' },
   ];
 
   const totalItems = getTotalItems();
@@ -23,27 +26,38 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to={`/${lang}`} className="flex items-center space-x-2">
             <Leaf className="h-7 w-7 text-emerald-600" />
             <span className="text-2xl font-bold text-gray-900 tracking-tight">Zayna</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
-                to={item.href}
+                to={`/${lang}/${item.href}`}
                 className="text-gray-600 hover:text-primary font-medium transition-colors"
               >
                 {item.name}
               </Link>
             ))}
+            <Select value={lang} onValueChange={setLang}>
+              <SelectTrigger className="w-[120px]">
+                <Globe className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Language" />
+              </SelectTrigger>
+              <SelectContent>
+                {supportedLanguages.map(l => (
+                  <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </nav>
 
           {/* Cart Icon & Mobile Menu Button */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <Link to="/cart">
+            <Link to={`/${lang}/cart`}>
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
@@ -79,13 +93,24 @@ const Header = () => {
               {navigation.map((item) => (
                 <Link
                   key={item.name}
-                  to={item.href}
+                  to={`/${lang}/${item.href}`}
                   className="text-gray-600 hover:text-primary font-medium py-2 transition-colors text-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
+               <Select value={lang} onValueChange={setLang}>
+                <SelectTrigger className="w-full mt-2">
+                  <Globe className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {supportedLanguages.map(l => (
+                    <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </nav>
           </div>
         )}

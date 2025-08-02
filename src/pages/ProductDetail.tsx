@@ -16,6 +16,35 @@ import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
+import { Helmet } from 'react-helmet-async';
+import { useProductSeo } from '@/hooks/useProductSeo';
+import { useLanguage } from '@/context/LanguageContext';
+
+const ProductSEOWrapper = ({ productId, children }) => {
+  const { lang } = useLanguage();
+  const { seoData, loading } = useProductSeo(productId, lang);
+
+  if (loading) {
+    return null; // Or a loading spinner for the helmet content
+  }
+
+  return (
+    <>
+      <Helmet>
+        {seoData?.seo_title && <title>{seoData.seo_title}</title>}
+        {seoData?.meta_description && <meta name="description" content={seoData.meta_description} />}
+        {seoData?.keywords && <meta name="keywords" content={seoData.keywords.join(', ')} />}
+        {seoData?.slug && <link rel="canonical" href={`https://zayna.vercel.app/product/${seoData.slug}`} />}
+        {seoData?.structured_data && (
+          <script type="application/ld+json">
+            {JSON.stringify(seoData.structured_data)}
+          </script>
+        )}
+      </Helmet>
+      {children}
+    </>
+  );
+};
 
 interface Product {
   id: string;
@@ -33,8 +62,16 @@ interface Product {
   freeShipping: boolean;
 }
 
+interface BuyNowForm {
+  name: string;
+  phone: string;
+  city: string;
+  location: string;
+}
+
 const ProductDetail = () => {
   const { id } = useParams();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,7 +148,7 @@ const ProductDetail = () => {
     return 'TRACK-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
   };
 
-  const handleBuyNow = async (data: any) => {
+  const handleBuyNow = async (data: BuyNowForm) => {
     if (!product) return;
 
     try {
@@ -243,10 +280,11 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="container mx-auto px-4 py-8">
+    <ProductSEOWrapper productId={id}>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+
+        <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Link to="/products">
             <Button variant="ghost" size="sm">
@@ -514,10 +552,11 @@ const ProductDetail = () => {
             </Card>
           </div>
         )}
+        </div>
+
+        <Footer />
       </div>
-      
-      <Footer />
-    </div>
+    </ProductSEOWrapper>
   );
 };
 
