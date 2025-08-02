@@ -184,6 +184,45 @@ const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Quelle est la différence entre un produit 'bio' et 'naturel' chez Zayna ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Chez Zayna, 'naturel' signifie que l'ingrédient provient de la nature. 'Bio' (biologique) va plus loin : c'est un label qui garantit que l'ingrédient a été cultivé sans pesticides ni produits chimiques de synthèse, et que sa transformation respecte des normes écologiques strictes. La plupart de nos produits phares, comme l'huile d'Argan, sont certifiés bio."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Les produits Zayna sont-ils testés sur les animaux ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolument jamais. Nous sommes une marque 100% sans cruauté. Nous testons nos produits via des méthodes alternatives et sur des volontaires humains pour garantir leur sécurité et leur efficacité, dans le respect total de la vie animale."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Comment puis-je savoir quel produit est adapté à mon type de peau ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "C'est une excellente question ! Chaque page de produit contient une section \"Pour quel type de peau ?\". Pour un conseil plus personnalisé, n'hésitez pas à contacter notre assistante beauté via WhatsApp. Elle se fera un plaisir de vous guider vers la routine de soins parfaite pour vous."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Proposez-vous le paiement par carte bancaire ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Actuellement, pour simplifier et sécuriser le processus pour tous nos clients au Maroc, nous proposons exclusivement le paiement à la livraison. Vous ne payez votre commande qu'au moment où vous la recevez."
+        }
+      }
+    ]
+  };
+
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -289,7 +328,7 @@ const Index = () => {
         <meta property="og:image" content="https://placehold.co/1200x630/7a956b/f5f5f0?text=Zayna" />
         <meta property="og:url" content="https://www.zayna.ma" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify([websiteSchema, faqSchema])}</script>
       </Helmet>
       <style>{`
         @keyframes kenburns {
@@ -577,9 +616,9 @@ const Index = () => {
                 </div>
             </motion.section>
 
-            {/* FAQ Snippet */}
+            {/* Enhanced FAQ Section */}
             <motion.section 
-                className="py-16 md:py-20"
+                className="py-16 md:py-20 bg-white"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
@@ -587,28 +626,42 @@ const Index = () => {
             >
                 <div className="container mx-auto px-4 max-w-3xl">
                   <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold">Questions Fréquentes</h2>
+                    <h2 className="text-3xl font-bold">Vos Questions, Nos Réponses</h2>
+                    <p className="text-gray-600 mt-2">Tout ce que vous devez savoir sur nos cosmétiques bio et nos services.</p>
                   </div>
-                  <Accordion type="single" collapsible className="w-full">
+                  <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
                     <AccordionItem value="item-1">
-                      <AccordionTrigger>Quels sont les délais de livraison ?</AccordionTrigger>
-                      <AccordionContent>
-                        La livraison prend généralement entre 24 et 72 heures, selon votre ville au Maroc.
+                      <AccordionTrigger className="text-lg">Quelle est la différence entre un produit 'bio' et 'naturel' chez Zayna ?</AccordionTrigger>
+                      <AccordionContent className="text-base">
+                        Chez Zayna, 'naturel' signifie que l'ingrédient provient de la nature. 'Bio' (biologique) va plus loin : c'est un label qui garantit que l'ingrédient a été cultivé sans pesticides ni produits chimiques de synthèse, et que sa transformation respecte des normes écologiques strictes. La plupart de nos produits phares, comme l'huile d'Argan, sont certifiés bio.
                       </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2">
-                      <AccordionTrigger>Vos produits sont-ils vraiment 100% bio ?</AccordionTrigger>
-                      <AccordionContent>
-                        Oui, nous nous engageons à utiliser des ingrédients issus de l'agriculture biologique, et beaucoup de nos produits sont certifiés ECOCERT.
+                      <AccordionTrigger className="text-lg">Les produits Zayna sont-ils testés sur les animaux ?</AccordionTrigger>
+                      <AccordionContent className="text-base">
+                        Absolument jamais. Nous sommes une marque 100% sans cruauté. Nous testons nos produits via des méthodes alternatives et sur des volontaires humains pour garantir leur sécurité et leur efficacité, dans le respect total de la vie animale.
                       </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3">
-                      <AccordionTrigger>Puis-je retourner un produit ?</AccordionTrigger>
-                      <AccordionContent>
-                        Oui, vous disposez de 7 jours pour nous retourner un produit s'il ne vous convient pas, à condition qu'il n'ait pas été ouvert.
+                      <AccordionTrigger className="text-lg">Comment puis-je savoir quel produit est adapté à mon type de peau ?</AccordionTrigger>
+                      <AccordionContent className="text-base">
+                        C'est une excellente question ! Chaque page de produit contient une section "Pour quel type de peau ?". Pour un conseil plus personnalisé, n'hésitez pas à contacter notre assistante beauté via WhatsApp. Elle se fera un plaisir de vous guider vers la routine de soins parfaite pour vous.
+                      </AccordionContent>
+                    </AccordionItem>
+                     <AccordionItem value="item-4">
+                      <AccordionTrigger className="text-lg">Proposez-vous le paiement par carte bancaire ?</AccordionTrigger>
+                      <AccordionContent className="text-base">
+                        Actuellement, pour simplifier et sécuriser le processus pour tous nos clients au Maroc, nous proposons exclusivement le paiement à la livraison. Vous ne payez votre commande qu'au moment où vous la recevez.
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
+                  <div className="text-center mt-12">
+                    <Button asChild variant="outline">
+                      <Link to="/contact">
+                        Vous avez d'autres questions ? Contactez-nous <ArrowRight className="h-4 w-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
             </motion.section>
 
