@@ -1,6 +1,7 @@
 import { useState, useEffect, memo, useRef, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { ShoppingCart, Star, Truck, Shield, MessageCircle, ArrowRight, Sparkles, Bot, ShoppingBasket, ClipboardCheck, HandCoins, Quote } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -183,6 +184,17 @@ const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://www.zayna.ma/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.zayna.ma/products?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -269,6 +281,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>Zayna - Cosmétiques Bio et Naturels du Maroc</title>
+        <meta name="description" content="Découvrez Zayna, la marque de cosmétiques bio et naturels inspirée des rituels de beauté marocains. Soins à l'huile d'argan, savon noir et plus encore. Livraison partout au Maroc." />
+        <meta property="og:title" content="Zayna - Cosmétiques Bio et Naturels du Maroc" />
+        <meta property="og:description" content="Soins authentiques pour une beauté naturelle. Découvrez nos produits à base d'ingrédients marocains d'exception." />
+        <meta property="og:image" content="https://placehold.co/1200x630/7a956b/f5f5f0?text=Zayna" />
+        <meta property="og:url" content="https://www.zayna.ma" />
+        <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
+      </Helmet>
       <style>{`
         @keyframes kenburns {
           0% { transform: scale(1.0) translate(0, 0); }
