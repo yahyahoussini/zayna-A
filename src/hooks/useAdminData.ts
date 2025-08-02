@@ -3,51 +3,72 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product, Order, Category, ProductForm } from '@/types/admin';
 import { toast } from '@/hooks/use-toast';
 
+const ITEMS_PER_PAGE = 20;
+
 export const useAdminData = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // --- MODIFIED: loadData now fetches everything in parallel ---
-  const loadData = useCallback(async () => {
+  const [productsPage, setProductsPage] = useState(1);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+
+  const loadData = useCallback(async (page: number, type: 'products' | 'orders' | 'all' = 'all') => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('User not authenticated');
-        setLoading(false);
-        return;
+      const from = (page - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
+      const productsQuery = supabase.from('products').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to);
+      const ordersQuery = supabase.from('orders').select('*, order_items ( * )', { count: 'exact' }).order('created_at', { ascending: false }).range(from, to);
+      const categoriesQuery = supabase.from('categories').select('*').order('name');
+      
+      const promises = [];
+      if (type === 'all' || type === 'products') promises.push(productsQuery);
+      if (type === 'all' || type === 'orders') promises.push(ordersQuery);
+      if (type === 'all') promises.push(categoriesQuery);
+
+      const [productsResponse, ordersResponse, categoriesResponse] = await Promise.all(promises);
+
+      if (productsResponse?.error) throw productsResponse.error;
+      if (ordersResponse?.error) throw ordersResponse.error;
+      if (categoriesResponse?.error) throw categoriesResponse.error;
+
+      if (productsResponse?.data) {
+        setProducts(productsResponse.data);
+        setTotalProducts(productsResponse.count || 0);
+      }
+      if (ordersResponse?.data) {
+        setOrders(ordersResponse.data);
+        setTotalOrders(ordersResponse.count || 0);
+      }
+      if (categoriesResponse?.data) {
+        setCategories(categoriesResponse.data);
       }
 
-      // --- All requests are sent at the same time ---
-      const [productsResponse, ordersResponse, categoriesResponse] = await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
-        supabase.from('orders').select('*, order_items ( * )').order('created_at', { ascending: false }),
-        supabase.from('categories').select('*').order('name')
-      ]);
-      
-      // --- Handle all potential errors after requests complete ---
-      if (productsResponse.error) throw productsResponse.error;
-      if (ordersResponse.error) throw ordersResponse.error;
-      if (categoriesResponse.error) throw categoriesResponse.error;
-
-      // --- Set all state at once ---
-      setProducts(productsResponse.data || []);
-      setOrders(ordersResponse.data || []);
-      setCategories(categoriesResponse.data || []);
-
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error loading admin data:', error);
       toast({ title: 'Error', description: 'Failed to load data from the server.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  }, []); // Use useCallback to memoize this function
+  }, []);
 
   useEffect(() => {
-    loadData();
+    loadData(1, 'all');
   }, [loadData]);
+
+  useEffect(() => {
+    loadData(productsPage, 'products');
+  }, [productsPage, loadData]);
+
+  useEffect(() => {
+    loadData(ordersPage, 'orders');
+  }, [ordersPage, loadData]);
 
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -60,11 +81,12 @@ export const useAdminData = () => {
       if (error) throw error;
 
       const updatedOrders = orders.map(order =>
-        order.order_id === orderId ? { ...order, status: newStatus as any } : order
+        order.order_id === orderId ? { ...order, status: newStatus as Order['status'] } : order
       );
       setOrders(updatedOrders);
       toast({ title: 'Status Updated', description: `Order ${orderId} status updated.` });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error updating order status:', error);
       toast({ title: 'Error', description: 'Failed to update order status.', variant: 'destructive' });
     }
@@ -109,7 +131,8 @@ export const useAdminData = () => {
 
       setProducts([data, ...products]);
       toast({ title: 'Product Added', description: `${data.name} has been added successfully.` });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error adding product:', error);
       toast({ title: 'Error', description: `Failed to add product. Details: ${error.message}`, variant: 'destructive' });
     }
@@ -121,7 +144,8 @@ export const useAdminData = () => {
       if (error) throw error;
       setProducts(products.filter(p => p.id !== productId));
       toast({ title: 'Product Deleted', description: 'Product has been removed successfully.' });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error deleting product:', error);
       toast({ title: 'Error', description: 'Failed to delete product.', variant: 'destructive' });
     }
@@ -150,7 +174,8 @@ export const useAdminData = () => {
 
       setProducts(products.map(p => p.id === editProductForm.id ? editProductForm : p));
       toast({ title: 'Product Updated', description: 'Product has been updated successfully.' });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error updating product:', error);
       toast({ title: 'Error', description: 'Failed to update product.', variant: 'destructive' });
     }
@@ -173,7 +198,8 @@ export const useAdminData = () => {
 
       setCategories([...categories, data]);
       toast({ title: 'Category Added', description: `${data.name} category has been created.` });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error adding category:', error);
       toast({ title: 'Error', description: 'Failed to add category.', variant: 'destructive' });
     }
@@ -185,7 +211,8 @@ export const useAdminData = () => {
       if (error) throw error;
       setCategories(categories.filter(c => c.id !== categoryId));
       toast({ title: 'Category Deleted', description: 'Category has been removed successfully.' });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error deleting category:', error);
       toast({ title: 'Error', description: 'Failed to delete category.', variant: 'destructive' });
     }
@@ -202,6 +229,12 @@ export const useAdminData = () => {
     updateProduct,
     addCategory,
     deleteCategory,
-    loadData
+    productsPage,
+    setProductsPage,
+    totalProducts,
+    ordersPage,
+    setOrdersPage,
+    totalOrders,
+    ITEMS_PER_PAGE,
   };
 };

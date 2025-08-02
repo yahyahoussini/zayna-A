@@ -23,7 +23,14 @@ const AdminDashboard = () => {
     deleteProduct,
     updateProduct,
     addCategory,
-    deleteCategory
+    deleteCategory,
+    ordersPage,
+    setOrdersPage,
+    totalOrders,
+    productsPage,
+    setProductsPage,
+    totalProducts,
+    ITEMS_PER_PAGE,
   } = useAdminData();
 
   useEffect(() => {
@@ -72,7 +79,14 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="orders">
-            <AdminOrders orders={orders} updateOrderStatus={updateOrderStatus} />
+            <AdminOrders
+              orders={orders}
+              updateOrderStatus={updateOrderStatus}
+              page={ordersPage}
+              setPage={setOrdersPage}
+              total={totalOrders}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           </TabsContent>
 
           <TabsContent value="products">
@@ -82,6 +96,10 @@ const AdminDashboard = () => {
               addProduct={addProduct}
               deleteProduct={deleteProduct}
               updateProduct={updateProduct}
+              page={productsPage}
+              setPage={setProductsPage}
+              total={totalProducts}
+              itemsPerPage={ITEMS_PER_PAGE}
             />
           </TabsContent>
 

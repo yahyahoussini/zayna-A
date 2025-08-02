@@ -21,10 +21,15 @@ interface OrderWithItems extends Order {
 interface AdminOrdersProps {
   orders: OrderWithItems[];
   updateOrderStatus: (orderId: string, newStatus: string) => void;
+  page: number;
+  setPage: (page: number) => void;
+  total: number;
+  itemsPerPage: number;
 }
 
-export const AdminOrders = ({ orders, updateOrderStatus }: AdminOrdersProps) => {
+export const AdminOrders = ({ orders, updateOrderStatus, page, setPage, total, itemsPerPage }: AdminOrdersProps) => {
   const [selectedOrder, setSelectedOrder] = useState<OrderWithItems | null>(null);
+  const totalPages = Math.ceil(total / itemsPerPage);
 
   const handlePrint = () => {
     window.print();
@@ -36,7 +41,7 @@ export const AdminOrders = ({ orders, updateOrderStatus }: AdminOrdersProps) => 
         <CardHeader>
           <CardTitle>Recent Orders</CardTitle>
           <CardDescription>
-            Manage and track customer orders
+            Manage and track customer orders. Showing page {page} of {totalPages}.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -156,6 +161,23 @@ export const AdminOrders = ({ orders, updateOrderStatus }: AdminOrdersProps) => 
             )}
           </div>
         </CardContent>
+        <div className="p-4 border-t flex justify-between items-center">
+            <Button
+                variant="outline"
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+            >
+                Previous
+            </Button>
+            <span>Page {page} of {totalPages}</span>
+            <Button
+                variant="outline"
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages}
+            >
+                Next
+            </Button>
+        </div>
       </Card>
       
       {/* La section imprimable reste la même */}

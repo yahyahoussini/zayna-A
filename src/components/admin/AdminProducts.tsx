@@ -16,11 +16,19 @@ interface AdminProductsProps {
   addProduct: (productForm: ProductForm) => void;
   deleteProduct: (productId: string) => void;
   updateProduct: (product: Product) => void;
+  page: number;
+  setPage: (page: number) => void;
+  total: number;
+  itemsPerPage: number;
 }
 
 export const AdminProducts = ({
   products,
   categories,
+  page,
+  setPage,
+  total,
+  itemsPerPage,
   addProduct,
   deleteProduct,
   updateProduct
@@ -36,6 +44,7 @@ export const AdminProducts = ({
     badge_color: '#000000',
   });
   const [editProductForm, setEditProductForm] = useState<Product | null>(null);
+  const totalPages = Math.ceil(total / itemsPerPage);
 
   const handleAddProduct = () => {
     addProduct(productForm);
@@ -393,6 +402,23 @@ export const AdminProducts = ({
           ))}
         </div>
       </CardContent>
+      <div className="p-4 border-t flex justify-between items-center">
+        <Button
+          variant="outline"
+          onClick={() => setPage(page - 1)}
+          disabled={page <= 1}
+        >
+          Previous
+        </Button>
+        <span>Page {page} of {totalPages}</span>
+        <Button
+          variant="outline"
+          onClick={() => setPage(page + 1)}
+          disabled={page >= totalPages}
+        >
+          Next
+        </Button>
+      </div>
     </Card>
   );
 };
