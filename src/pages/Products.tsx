@@ -11,6 +11,7 @@ import { Badge } from '../components/ui/badge';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '../hooks/use-toast';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../components/ui/sheet';
@@ -206,7 +207,7 @@ const useProductFilters = () => {
 };
 
 // --- MODIFIED: ProductCard Component now uses optimized images ---
-const ProductCard = memo(({ product, viewMode }: { product: Product, viewMode: 'grid' | 'list' }) => {
+const ProductCard = memo(({ product, viewMode, lang }: { product: Product; viewMode: 'grid' | 'list', lang: string }) => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     
@@ -232,7 +233,7 @@ const ProductCard = memo(({ product, viewMode }: { product: Product, viewMode: '
     if (viewMode === 'list') {
         return (
             <motion.div variants={itemVariants}>
-                <Card onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer group overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col sm:flex-row border-neutral-200/80 bg-white">
+                <Card onClick={() => navigate(`/${lang}/product/${product.id}`)} className="cursor-pointer group overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col sm:flex-row border-neutral-200/80 bg-white">
                     <div className="sm:w-1/3 md:w-1/4 relative bg-gray-100">
                         <img src={displayImage} alt={product.name} className="w-full h-48 sm:h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
@@ -257,7 +258,7 @@ const ProductCard = memo(({ product, viewMode }: { product: Product, viewMode: '
 
     return (
         <motion.div variants={itemVariants}>
-            <Card onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer group overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-xl border-neutral-200/80 bg-white">
+            <Card onClick={() => navigate(`/${lang}/product/${product.id}`)} className="cursor-pointer group overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-xl border-neutral-200/80 bg-white">
                 <CardHeader className="p-0 relative">
                     <div className="absolute top-3 right-3 z-10 flex items-center bg-white/70 backdrop-blur-sm px-2 py-1 rounded-full text-sm">
                         <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
@@ -371,6 +372,7 @@ const ActiveFiltersDisplay = ({ filters, clearFns }) => {
 const Products = () => {
     const { products, totalProducts, loading, loadingMore, hasMore, loadMore, filters, clearFns } = useProductFilters();
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const { lang } = useLanguage();
     const loaderRef = useRef(null);
 
     useEffect(() => {
@@ -478,7 +480,7 @@ const Products = () => {
                                     animate="visible"
                                 >
                                     {products.map((product) => (
-                                        <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                                        <ProductCard key={product.id} product={product} viewMode={viewMode} lang={lang} />
                                     ))}
                                 </motion.div>
                             )}
