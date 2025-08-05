@@ -18,11 +18,9 @@ import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
 import { useProductSeo } from '@/hooks/useProductSeo';
-import { useLanguage } from '@/context/LanguageContext';
 
 const ProductSEOWrapper = ({ productId, children }) => {
-  const { lang } = useLanguage();
-  const { seoData, loading } = useProductSeo(productId, lang);
+  const { seoData, loading } = useProductSeo(productId, 'en'); // Hardcode to 'en'
 
   if (loading) {
     return null; // Or a loading spinner for the helmet content
@@ -71,7 +69,6 @@ interface BuyNowForm {
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { lang } = useLanguage();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);

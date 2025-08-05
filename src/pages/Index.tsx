@@ -9,7 +9,6 @@ import { Badge } from '../components/ui/badge';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
-import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '../hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -65,7 +64,7 @@ interface Product {
 }
 
 // --- Composant ProductCard avec effet 3D amélioré ---
-const HomePageProductCard = memo(({ product, lang }: { product: Product; lang: string }) => {
+const HomePageProductCard = memo(({ product }: { product: Product }) => {
   const { addToCart } = useCart();
   const displayImage = product.thumbnail_image || product.images?.[0] || 'https://placehold.co/400x400/F0FFF4/228B22?text=Zayna';
 
@@ -88,7 +87,7 @@ const HomePageProductCard = memo(({ product, lang }: { product: Product; lang: s
 
   return (
     <motion.div variants={itemVariants} className="h-full">
-        <Link to={`/${lang}/product/${product.id}`} className="block h-full group [perspective:1000px]">
+        <Link to={`/product/${product.id}`} className="block h-full group [perspective:1000px]">
         <Card className="transition-all duration-500 h-full flex flex-col border-transparent group-hover:shadow-2xl group-hover:[transform:rotateY(5deg)_rotateX(5deg)] relative">
             <CardHeader className="p-0">
             <div className="relative w-full h-56 bg-gray-100 overflow-hidden rounded-t-lg">
@@ -179,7 +178,6 @@ const ParallaxImage = () => {
 
 // --- Composant Principal de la page d'accueil ---
 const Index = () => {
-  const { lang } = useLanguage();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [newestProducts, setNewestProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -465,7 +463,7 @@ const Index = () => {
                     animate={!loading ? "visible" : "hidden"}
                   >
                     {loading ? Array.from({ length: 4 }).map((_, i) => <ProductSkeletonCard key={i} />) 
-                             : featuredProducts.map((product) => <HomePageProductCard key={product.id} product={product} lang={lang} />)
+                             : featuredProducts.map((product) => <HomePageProductCard key={product.id} product={product} />)
                     }
                   </motion.div>
                 </TabsContent>
@@ -477,7 +475,7 @@ const Index = () => {
                     animate={!loading ? "visible" : "hidden"}
                   >
                     {loading ? Array.from({ length: 4 }).map((_, i) => <ProductSkeletonCard key={i} />) 
-                             : newestProducts.map((product) => <HomePageProductCard key={product.id} product={product} lang={lang} />)
+                             : newestProducts.map((product) => <HomePageProductCard key={product.id} product={product} />)
                     }
                   </motion.div>
                 </TabsContent>
