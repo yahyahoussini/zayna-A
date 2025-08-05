@@ -211,11 +211,12 @@ const ProductDetail = () => {
 
       form.reset();
       setShowBuyNowForm(false);
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       console.error('Error placing order:', error);
       toast({
         title: 'Order Failed',
-        description: 'There was an error placing your order. Please try again.',
+        description: `There was an error placing your order. Please try again. Details: ${error.message}`,
         variant: 'destructive'
       });
     }
