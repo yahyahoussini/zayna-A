@@ -71,7 +71,7 @@ const Checkout = () => {
     }
 
     // Phone validation
-    const phoneRegex = /^[\+]?[\d\s\-\(\)]{10,}$/;
+    const phoneRegex = /^[+]?[\d\s-()]{10,}$/;
     if (!phoneRegex.test(formData.phone)) {
       toast({
         title: 'Invalid Phone Number',
@@ -108,6 +108,9 @@ const Checkout = () => {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+
       // Create order in Supabase
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -117,7 +120,7 @@ const Checkout = () => {
           customer_first_name: firstName,
           customer_last_name: lastName,
           customer_phone: formData.phone,
-          customer_email: '',
+          customer_email: user?.email || '',
           shipping_address: formData.location,
           shipping_city: formData.city,
           shipping_state: '',
@@ -128,7 +131,8 @@ const Checkout = () => {
           total: total,
           payment_method: 'cod',
           status: 'pending',
-          notes: formData.notes
+          notes: formData.notes,
+          user_id: user?.id
         })
         .select()
         .single();

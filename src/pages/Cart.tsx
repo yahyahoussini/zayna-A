@@ -23,7 +23,7 @@ import { Product } from '@/types'; // Assurez-vous d'avoir un type Product défi
 // --- Schéma de validation du formulaire ---
 const shippingSchema = z.object({
   fullName: z.string().min(3, { message: "Le nom complet doit contenir au moins 3 caractères." }),
-  phone: z.string().regex(/^[\+]?[\d\s\-\(\)]{10,}$/, { message: "Veuillez entrer un numéro de téléphone valide." }),
+  phone: z.string().regex(/^[+]?[\d\s-()]{10,}$/, { message: "Veuillez entrer un numéro de téléphone valide." }),
   city: z.string().min(2, { message: "La ville est requise." }),
   location: z.string().min(5, { message: "Une adresse détaillée est requise." }),
   notes: z.string().optional(),
