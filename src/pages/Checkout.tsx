@@ -71,7 +71,7 @@ const Checkout = () => {
     }
 
     // Phone validation
-    const phoneRegex = /^[\+]?[\d\s\-\(\)]{10,}$/;
+    const phoneRegex = /^[+]?[\d\s()-]{10,}$/;
     if (!phoneRegex.test(formData.phone)) {
       toast({
         title: 'Invalid Phone Number',
@@ -133,8 +133,8 @@ const Checkout = () => {
         .select()
         .single();
 
-      if (orderError) {
-        throw new Error(orderError.message);
+      if (orderError || !orderData) {
+        throw new Error(orderError?.message || 'Failed to create order.');
       }
 
       // Create order items

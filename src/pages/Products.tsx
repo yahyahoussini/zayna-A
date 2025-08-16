@@ -178,8 +178,10 @@ const useProductFilters = () => {
             const { data, error } = await query;
             if (error) throw error;
 
-            setProducts(prev => [...prev, ...data]);
-            setPage(nextPage);
+            if (data) {
+                setProducts(prev => [...prev, ...data]);
+                setPage(nextPage);
+            }
 
         } catch (error) {
              console.error("Error loading more products:", error);
