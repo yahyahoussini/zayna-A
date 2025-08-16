@@ -109,7 +109,7 @@ const Checkout = () => {
       const lastName = nameParts.slice(1).join(' ') || '';
 
       // Create order in Supabase
-      const { data: orderData, error: orderError } = await supabase
+      const { error: orderError } = await supabase
         .from('orders')
         .insert({
           order_id: orderId,
@@ -129,9 +129,7 @@ const Checkout = () => {
           payment_method: 'cod',
           status: 'pending',
           notes: formData.notes
-        })
-        .select()
-        .single();
+        });
 
       if (orderError) {
         throw new Error(orderError.message);
@@ -139,7 +137,7 @@ const Checkout = () => {
 
       // Create order items
       const orderItems = state.items.map(item => ({
-        order_id: orderData.id,
+        order_id: orderId,
         product_name: item.name,
         product_price: item.price,
         product_image: item.image,

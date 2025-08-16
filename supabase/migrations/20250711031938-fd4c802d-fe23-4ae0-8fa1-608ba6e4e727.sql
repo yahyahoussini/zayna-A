@@ -38,7 +38,7 @@ CREATE TABLE public.orders (
 -- Create order_items table
 CREATE TABLE public.order_items (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  order_id TEXT NOT NULL REFERENCES public.orders(order_id) ON DELETE CASCADE,
   product_id UUID REFERENCES public.products(id),
   product_name TEXT NOT NULL,
   product_price DECIMAL(10,2) NOT NULL,
