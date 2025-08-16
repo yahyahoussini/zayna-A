@@ -14,7 +14,303 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          product_image: string | null
+          product_name: string
+          product_price: number
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name: string
+          product_price: number
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name?: string
+          product_price?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_first_name: string
+          customer_last_name: string
+          customer_phone: string
+          id: string
+          notes: string | null
+          order_id: string
+          payment_method: string
+          shipping_address: string
+          shipping_city: string
+          shipping_cost: number
+          shipping_country: string | null
+          shipping_state: string | null
+          shipping_zip_code: string | null
+          status: string
+          subtotal: number
+          total: number
+          tracking_code: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_first_name: string
+          customer_last_name: string
+          customer_phone: string
+          id?: string
+          notes?: string | null
+          order_id: string
+          payment_method?: string
+          shipping_address: string
+          shipping_city: string
+          shipping_cost?: number
+          shipping_country?: string | null
+          shipping_state?: string | null
+          shipping_zip_code?: string | null
+          status?: string
+          subtotal: number
+          total: number
+          tracking_code: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_first_name?: string
+          customer_last_name?: string
+          customer_phone?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+          payment_method?: string
+          shipping_address?: string
+          shipping_city?: string
+          shipping_cost?: number
+          shipping_country?: string | null
+          shipping_state?: string | null
+          shipping_zip_code?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          tracking_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          discount_percentage: number | null
+          id: string
+          image: string | null
+          in_stock: boolean | null
+          name: string
+          num_reviews: number | null
+          price: number
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          image?: string | null
+          in_stock?: boolean | null
+          name: string
+          num_reviews?: number | null
+          price: number
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          image?: string | null
+          in_stock?: boolean | null
+          name?: string
+          num_reviews?: number | null
+          price?: number
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_name: string
+          id: string
+          is_approved: boolean | null
+          order_id: string
+          product_id: string
+          rating: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_name: string
+          id?: string
+          is_approved?: boolean | null
+          order_id: string
+          product_id: string
+          rating: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_name?: string
+          id?: string
+          is_approved?: boolean | null
+          order_id?: string
+          product_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_analytics: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          page_url: string | null
+          referrer: string | null
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          page_url?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          page_url?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

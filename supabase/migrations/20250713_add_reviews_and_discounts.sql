@@ -9,7 +9,7 @@ ADD COLUMN discount_percentage NUMERIC(5, 2) DEFAULT 0.00;
 
 -- CRÉER LA TABLE POUR LES AVIS (REVIEWS)
 CREATE TABLE public.reviews (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT extensions.gen_random_uuid() PRIMARY KEY,
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
   order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),

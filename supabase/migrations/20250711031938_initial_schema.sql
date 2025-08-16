@@ -1,6 +1,8 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 -- Create products table
 CREATE TABLE public.products (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT extensions.gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   image TEXT,
@@ -13,7 +15,7 @@ CREATE TABLE public.products (
 
 -- Create orders table
 CREATE TABLE public.orders (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT extensions.gen_random_uuid() PRIMARY KEY,
   order_id TEXT NOT NULL UNIQUE,
   tracking_code TEXT NOT NULL UNIQUE,
   customer_first_name TEXT NOT NULL,
@@ -37,7 +39,7 @@ CREATE TABLE public.orders (
 
 -- Create order_items table
 CREATE TABLE public.order_items (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT extensions.gen_random_uuid() PRIMARY KEY,
   order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
   product_id UUID REFERENCES public.products(id),
   product_name TEXT NOT NULL,
@@ -49,7 +51,7 @@ CREATE TABLE public.order_items (
 
 -- Create profiles table for admin users
 CREATE TABLE public.profiles (
-  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID NOT NULL DEFAULT extensions.gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT,
   role TEXT DEFAULT 'customer',
@@ -64,77 +66,77 @@ ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for products (public read access)
-CREATE POLICY "Products are viewable by everyone" 
-ON public.products 
-FOR SELECT 
+CREATE POLICY "Products are viewable by everyone"
+ON public.products
+FOR SELECT
 USING (true);
 
-CREATE POLICY "Admins can manage products" 
-ON public.products 
-FOR ALL 
+CREATE POLICY "Admins can manage products"
+ON public.products
+FOR ALL
 USING (
   EXISTS (
-    SELECT 1 FROM public.profiles 
+    SELECT 1 FROM public.profiles
     WHERE user_id = auth.uid() AND role = 'admin'
   )
 );
 
 -- Create policies for orders
-CREATE POLICY "Orders are viewable by admins" 
-ON public.orders 
-FOR SELECT 
+CREATE POLICY "Orders are viewable by admins"
+ON public.orders
+FOR SELECT
 USING (
   EXISTS (
-    SELECT 1 FROM public.profiles 
+    SELECT 1 FROM public.profiles
     WHERE user_id = auth.uid() AND role = 'admin'
   )
 );
 
-CREATE POLICY "Anyone can create orders" 
-ON public.orders 
-FOR INSERT 
+CREATE POLICY "Anyone can create orders"
+ON public.orders
+FOR INSERT
 WITH CHECK (true);
 
-CREATE POLICY "Admins can update orders" 
-ON public.orders 
-FOR UPDATE 
+CREATE POLICY "Admins can update orders"
+ON public.orders
+FOR UPDATE
 USING (
   EXISTS (
-    SELECT 1 FROM public.profiles 
+    SELECT 1 FROM public.profiles
     WHERE user_id = auth.uid() AND role = 'admin'
   )
 );
 
 -- Create policies for order_items
-CREATE POLICY "Order items viewable by admins" 
-ON public.order_items 
-FOR SELECT 
+CREATE POLICY "Order items viewable by admins"
+ON public.order_items
+FOR SELECT
 USING (
   EXISTS (
-    SELECT 1 FROM public.profiles 
+    SELECT 1 FROM public.profiles
     WHERE user_id = auth.uid() AND role = 'admin'
   )
 );
 
-CREATE POLICY "Anyone can create order items" 
-ON public.order_items 
-FOR INSERT 
+CREATE POLICY "Anyone can create order items"
+ON public.order_items
+FOR INSERT
 WITH CHECK (true);
 
 -- Create policies for profiles
-CREATE POLICY "Users can view their own profile" 
-ON public.profiles 
-FOR SELECT 
+CREATE POLICY "Users can view their own profile"
+ON public.profiles
+FOR SELECT
 USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update their own profile" 
-ON public.profiles 
-FOR UPDATE 
+CREATE POLICY "Users can update their own profile"
+ON public.profiles
+FOR UPDATE
 USING (auth.uid() = user_id);
 
-CREATE POLICY "Anyone can create a profile" 
-ON public.profiles 
-FOR INSERT 
+CREATE POLICY "Anyone can create a profile"
+ON public.profiles
+FOR INSERT
 WITH CHECK (auth.uid() = user_id);
 
 -- Create function to update timestamps
