@@ -261,18 +261,18 @@ const Cart = () => {
                   <CardContent className="p-0">
                     <div className="divide-y divide-gray-200">
                       {state.items.map(item => (
-                        <div key={item.id} className="p-4 flex items-center space-x-4">
-                          <img src={item.image} alt={item.name} className="w-24 h-24 object-cover rounded-lg" />
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-lg">{item.name}</h3>
-                            <p className="text-gray-600">{item.price.toFixed(2)} DH</p>
+                        <div key={item.id} className="p-4 flex flex-wrap items-center gap-4">
+                          <img src={item.image} alt={item.name} className="w-16 h-16 sm:w-24 sm:h-24 object-cover rounded-lg" />
+                          <div className="flex-1 min-w-[150px]">
+                            <h3 className="font-semibold text-md sm:text-lg">{item.name}</h3>
+                            <p className="text-gray-600 text-sm sm:text-base">{item.price.toFixed(2)} DH</p>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.id, item.quantity - 1)}><Minus className="h-4 w-4" /></Button>
-                            <span className="w-10 text-center">{item.quantity}</span>
+                            <span className="w-8 text-center">{item.quantity}</span>
                             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.id, item.quantity + 1)}><Plus className="h-4 w-4" /></Button>
                           </div>
-                          <p className="font-semibold w-24 text-right">{(item.price * item.quantity).toFixed(2)} DH</p>
+                          <p className="font-semibold w-20 text-right">{(item.price * item.quantity).toFixed(2)} DH</p>
                           <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)} className="text-gray-400 hover:text-red-600"><Trash2 className="h-4 w-4" /></Button>
                         </div>
                       ))}
