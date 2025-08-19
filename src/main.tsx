@@ -6,12 +6,15 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { HelmetProvider } from 'react-helmet-async' // <-- 1. Import this
+import { HelmetProvider } from 'react-helmet-async'
+import ThemeProvider from './components/ThemeProvider'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <HelmetProvider> {/* <-- 2. Add this wrapper */}
-      <App />
+    <HelmetProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </HelmetProvider>
   </React.StrictMode>,
 )
