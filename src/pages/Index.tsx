@@ -283,7 +283,7 @@ const Index = () => {
       
       <main>
         {/* Hero Section */}
-        <section className="relative h-[80vh] lg:h-[85vh] w-full overflow-hidden flex items-center justify-center">
+        <section className="relative min-h-[500px] md:min-h-[600px] lg:min-h-[700px] w-full overflow-hidden flex items-center justify-center">
             <video 
                 src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4" 
                 autoPlay 
@@ -423,7 +423,7 @@ const Index = () => {
         </section>
 
         {/* 3D Showcase Section */}
-        <div ref={scrollContainerRef} className="h-[300vh] relative z-0">
+        <div ref={scrollContainerRef} className="h-[150vh] lg:h-[300vh] relative z-0">
           <div className="sticky top-0 h-screen w-full">
             <Suspense fallback={<div className="h-full w-full bg-gray-200 flex items-center justify-center"><p>Chargement de l'expérience 3D...</p></div>}>
               <ThreeDShowcase scrollProgress={scrollProgress} />
